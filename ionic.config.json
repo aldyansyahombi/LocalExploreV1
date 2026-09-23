@@ -1,0 +1,7 @@
+{
+  "name": "local-explore",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue-vite"
+}
