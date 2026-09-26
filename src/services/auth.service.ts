@@ -5,6 +5,11 @@ import {
 
 import type { User } from "../db/types";
 
+import {
+  hashPassword,
+  verifyPassword,
+} from "./password.service";
+
 const SESSION_KEY = "local_explore_user_id";
 
 export async function register(
@@ -26,10 +31,12 @@ export async function register(
     );
   }
 
+  const passwordHash =  await hashPassword(password);
+
   const user: User = {
     name: name.trim(),
     email: normalizedEmail,
-    password: password,
+    password: passwordHash,
     preferences: [...preferences],
     createdAt: new Date().toISOString(),
   };
@@ -47,9 +54,8 @@ export async function login(
   email: string,
   password: string
 ): Promise<User> {
-  const normalizedEmail = email
-    .trim()
-    .toLowerCase();
+  const normalizedEmail =
+    email.trim().toLowerCase();
 
   const user =
     await getUserByEmail(normalizedEmail);
@@ -60,7 +66,13 @@ export async function login(
     );
   }
 
-  if (user.password !== password) {
+  const passwordValid =
+    await verifyPassword(
+      password,
+      user.password
+    );
+
+  if (!passwordValid) {
     throw new Error(
       "Email atau password salah."
     );

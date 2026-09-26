@@ -50,7 +50,28 @@ export function getGeoapifyCategory(
       return "activity.community_center";
 
     case 5:
-      return "entertainment.museum";
+      return "entertainment.culture";
+
+    case 6:
+      return "entertainment";
+
+    case 7:
+      return "commercial";
+
+    case 8:
+      return "accommodation";
+
+    case 9:
+      return "education";
+
+    case 10:
+      return "healthcare";
+
+    case 11:
+      return "beach";
+
+    case 12:
+      return "activity.sport_club";
 
     default:
       return "tourism.sights";

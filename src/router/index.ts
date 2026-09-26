@@ -10,6 +10,7 @@ import FavoritesPage from "../views/FavoritesPage.vue";
 import HistoryPage from "../views/HistoryPage.vue";
 import ProfilePage from "../views/ProfilePage.vue";
 import MyPlacesPage from "../views/MyPlacesPage.vue";
+import PrivacyPolicyPage from "@/views/PrivacyPolicyPage.vue";
 
 import { isLoggedIn } from "@/services/auth.service.js";
 
@@ -35,6 +36,12 @@ const routes = [
     path: "/register",
     name: "Register",
     component: RegisterPage,
+  },
+
+  {
+    path: "/privacy-policy",
+    name: "PrivacyPolicy",
+    component: PrivacyPolicyPage,
   },
 
 

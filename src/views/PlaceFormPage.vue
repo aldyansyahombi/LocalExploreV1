@@ -1,177 +1,225 @@
 <template>
   <ion-page>
-    <ion-header>
-      <ion-toolbar>
+    <!-- HEADER -->
+    <ion-header class="ion-no-border">
+      <ion-toolbar class="custom-toolbar">
         <ion-buttons slot="start">
-          <ion-back-button default-href="/places" />
+          <ion-back-button default-href="/places" class="custom-back-btn" />
         </ion-buttons>
 
-        <ion-title>
+        <ion-title class="custom-title">
           {{ isEditMode ? "Edit Tempat" : "Tambah Tempat" }}
         </ion-title>
       </ion-toolbar>
     </ion-header>
 
-    <ion-content class="ion-padding">
+    <ion-content class="custom-content ion-padding">
 
       <!-- LOADING -->
       <div
         v-if="loading"
-        class="state-container"
+        class="state-container fade-in"
       >
-        <ion-spinner name="crescent" />
-        <p>Memuat data...</p>
+        <div class="spinner-wrapper">
+          <ion-spinner name="crescent" color="primary" />
+        </div>
+        <p>Memuat formulir...</p>
       </div>
 
       <!-- FORM -->
       <form
         v-else
         @submit.prevent="handleSubmit"
+        class="form-container fade-in"
       >
+        <!-- FORM HEADER -->
+        <div class="form-header">
+          <div class="header-icon">
+            {{ isEditMode ? "📝" : "✨" }}
+          </div>
+          <h2>{{ isEditMode ? "Perbarui Data" : "Tempat Baru" }}</h2>
+          <p>Lengkapi informasi di bawah ini.</p>
+        </div>
 
-        <!-- NAMA -->
-        <ion-item>
-          <ion-input
-            v-model="form.name"
-            label="Nama tempat"
-            label-placement="stacked"
-            placeholder="Contoh: Taman Kota Kendari"
-            :disabled="saving"
-            required
-          />
-        </ion-item>
+        <!-- ========================== -->
+        <!-- INFORMASI UTAMA -->
+        <!-- ========================== -->
+        <div class="form-section modern-card">
+          <h3 class="section-title">
+            <span class="title-icon">🏷️</span> Informasi Utama
+          </h3>
 
-        <!-- KATEGORI -->
-        <ion-item>
-          <ion-select
-            v-model="form.categoryId"
-            label="Kategori"
-            label-placement="stacked"
-            placeholder="Pilih kategori"
-            :disabled="saving"
-          >
-            <ion-select-option
-              v-for="category in categories"
-              :key="category.id"
-              :value="category.id"
+          <!-- NAMA -->
+          <ion-item class="modern-input" lines="none">
+            <ion-input
+              v-model="form.name"
+              label="Nama tempat"
+              label-placement="stacked"
+              placeholder="Contoh: Taman Kota Kendari"
+              :disabled="saving"
+              required
+            />
+          </ion-item>
+
+          <!-- KATEGORI -->
+          <ion-item class="modern-input" lines="none">
+            <ion-select
+              v-model="form.categoryId"
+              label="Kategori"
+              label-placement="stacked"
+              placeholder="Pilih kategori"
+              interface="popover"
+              :disabled="saving"
             >
-              {{ category.icon }}
-              {{ category.name }}
-            </ion-select-option>
-          </ion-select>
-        </ion-item>
+              <ion-select-option
+                v-for="category in categories"
+                :key="category.id"
+                :value="category.id"
+              >
+                {{ category.icon }} {{ category.name }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+        </div>
 
-        <!-- ALAMAT -->
-        <ion-item>
-          <ion-textarea
-            v-model="form.address"
-            label="Alamat"
-            label-placement="stacked"
-            placeholder="Masukkan alamat tempat"
-            :disabled="saving"
-            :auto-grow="true"
-          />
-        </ion-item>
+        <!-- ========================== -->
+        <!-- DETAIL LOKASI -->
+        <!-- ========================== -->
+        <div class="form-section modern-card">
+          <h3 class="section-title">
+            <span class="title-icon">📍</span> Detail Lokasi
+          </h3>
 
-        <!-- KOTA -->
-        <ion-item>
-          <ion-input
-            v-model="form.city"
-            label="Kota"
-            label-placement="stacked"
-            placeholder="Contoh: Kendari"
-            :disabled="saving"
-          />
-        </ion-item>
+          <!-- ALAMAT -->
+          <ion-item class="modern-input" lines="none">
+            <ion-textarea
+              v-model="form.address"
+              label="Alamat lengkap"
+              label-placement="stacked"
+              placeholder="Masukkan alamat tempat"
+              :disabled="saving"
+              :auto-grow="true"
+            />
+          </ion-item>
 
-        <!-- PROVINSI -->
-        <ion-item>
-          <ion-input
-            v-model="form.state"
-            label="Provinsi"
-            label-placement="stacked"
-            placeholder="Contoh: Sulawesi Tenggara"
-            :disabled="saving"
-          />
-        </ion-item>
+          <!-- KOTA & PROVINSI (GRID LAYOUT) -->
+          <div class="grid-2-col">
+            <!-- KOTA -->
+            <ion-item class="modern-input" lines="none">
+              <ion-input
+                v-model="form.city"
+                label="Kota"
+                label-placement="stacked"
+                placeholder="Ex: Kendari"
+                :disabled="saving"
+              />
+            </ion-item>
 
-        <!-- LATITUDE -->
-        <ion-item>
-          <ion-input
-            v-model.number="form.latitude"
-            type="number"
-            label="Latitude"
-            label-placement="stacked"
-            placeholder="-3.998"
-            :disabled="saving"
-          />
-        </ion-item>
+            <!-- PROVINSI -->
+            <ion-item class="modern-input" lines="none">
+              <ion-input
+                v-model="form.state"
+                label="Provinsi"
+                label-placement="stacked"
+                placeholder="Ex: Sultra"
+                :disabled="saving"
+              />
+            </ion-item>
+          </div>
 
-        <!-- LONGITUDE -->
-        <ion-item>
-          <ion-input
-            v-model.number="form.longitude"
-            type="number"
-            label="Longitude"
-            label-placement="stacked"
-            placeholder="122.512"
-            :disabled="saving"
-          />
-        </ion-item>
+          <!-- KOORDINAT (GRID LAYOUT) -->
+          <div class="grid-2-col mt-2">
+            <!-- LATITUDE -->
+            <ion-item class="modern-input" lines="none">
+              <ion-input
+                v-model.number="form.latitude"
+                type="number"
+                label="Latitude"
+                label-placement="stacked"
+                placeholder="-3.998"
+                :disabled="saving"
+              />
+            </ion-item>
 
-        <!-- DESKRIPSI -->
-        <ion-item>
-          <ion-textarea
-            v-model="form.description"
-            label="Deskripsi"
-            label-placement="stacked"
-            placeholder="Deskripsikan tempat ini..."
-            :disabled="saving"
-            :auto-grow="true"
-          />
-        </ion-item>
+            <!-- LONGITUDE -->
+            <ion-item class="modern-input" lines="none">
+              <ion-input
+                v-model.number="form.longitude"
+                type="number"
+                label="Longitude"
+                label-placement="stacked"
+                placeholder="122.512"
+                :disabled="saving"
+              />
+            </ion-item>
+          </div>
+        </div>
 
-        <!-- GAMBAR -->
-        <ion-item>
-          <ion-input
-            v-model="form.image"
-            type="url"
-            label="URL gambar"
-            label-placement="stacked"
-            placeholder="https://..."
-            :disabled="saving"
-          />
-        </ion-item>
+        <!-- ========================== -->
+        <!-- DESKRIPSI & MEDIA -->
+        <!-- ========================== -->
+        <div class="form-section modern-card">
+          <h3 class="section-title">
+            <span class="title-icon">🖼️</span> Deskripsi & Media
+          </h3>
+
+          <!-- DESKRIPSI -->
+          <ion-item class="modern-input" lines="none">
+            <ion-textarea
+              v-model="form.description"
+              label="Deskripsi"
+              label-placement="stacked"
+              placeholder="Ceritakan tentang tempat ini..."
+              :disabled="saving"
+              :auto-grow="true"
+            />
+          </ion-item>
+
+          <!-- GAMBAR -->
+          <ion-item class="modern-input" lines="none">
+            <ion-input
+              v-model="form.image"
+              type="url"
+              label="URL Gambar"
+              label-placement="stacked"
+              placeholder="https://..."
+              :disabled="saving"
+            />
+          </ion-item>
+        </div>
 
         <!-- ERROR -->
         <ion-text
           v-if="errorMessage"
           color="danger"
         >
-          <p class="error-message">
-            {{ errorMessage }}
-          </p>
+          <div class="error-box">
+            <span class="error-icon">⚠️</span>
+            <div>
+              <strong>Oops, ada masalah!</strong>
+              <p>{{ errorMessage }}</p>
+            </div>
+          </div>
         </ion-text>
 
-        <!-- SUBMIT -->
-        <ion-button
-          expand="block"
-          type="submit"
-          class="submit-button"
-          :disabled="saving"
-        >
-          <ion-spinner
-            v-if="saving"
-            name="crescent"
-          />
-
-          <span v-else>
-            {{ isEditMode
-              ? "Simpan Perubahan"
-              : "Tambah Tempat"
-            }}
-          </span>
-        </ion-button>
+        <!-- SUBMIT BUTTON -->
+        <div class="submit-wrapper">
+          <ion-button
+            expand="block"
+            type="submit"
+            shape="round"
+            class="submit-button"
+            :disabled="saving"
+          >
+            <ion-spinner
+              v-if="saving"
+              name="crescent"
+            />
+            <span v-else>
+              {{ isEditMode ? "💾 Simpan Perubahan" : "➕ Tambah Tempat" }}
+            </span>
+          </ion-button>
+        </div>
 
       </form>
 
@@ -534,25 +582,224 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-
-.state-container {
-  min-height: 60vh;
-
-  display: flex;
-  flex-direction: column;
-
-  justify-content: center;
-  align-items: center;
-
-  text-align: center;
+/* ====================
+   GLOBAL STYLES 
+   ==================== */
+.custom-content {
+  --background: #f8fafc;
 }
 
-.error-message {
-  margin: 16px 0;
+.custom-toolbar {
+  --background: #ffffff;
+  --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+
+.custom-title {
+  font-weight: 700;
+  font-size: 18px;
+  color: #1e293b;
+}
+
+.custom-back-btn {
+  color: #4f46e5;
+}
+
+/* ====================
+   FORM HEADER 
+   ==================== */
+.form-container {
+  padding-bottom: 30px;
+}
+
+.form-header {
+  text-align: center;
+  margin-bottom: 24px;
+  margin-top: 10px;
+}
+
+.header-icon {
+  font-size: 40px;
+  width: 70px;
+  height: 70px;
+  background: #e0e7ff;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+  box-shadow: 0 8px 16px rgba(67, 56, 202, 0.15);
+}
+
+.form-header h2 {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 6px;
+}
+
+.form-header p {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+}
+
+/* ====================
+   FORM SECTIONS (CARDS)
+   ==================== */
+.form-section {
+  padding: 20px 16px;
+  margin-bottom: 20px;
+}
+
+.modern-card {
+  border-radius: 24px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.03);
+  background: white;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 16px;
+}
+
+.title-icon {
+  font-size: 20px;
+}
+
+/* ====================
+   MODERN INPUT FIELDS
+   ==================== */
+.modern-input {
+  --background: #f8fafc;
+  --padding-start: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  margin-bottom: 14px;
+  transition: border-color 0.3s;
+}
+
+/* Optional: Slight border change when active/focused */
+.modern-input.item-has-focus {
+  border-color: #4f46e5;
+  --background: #ffffff;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.05);
+}
+
+/* Specifically styling the label and input text inside ion-item */
+ion-input, ion-textarea, ion-select {
+  font-size: 14px;
+  color: #0f172a;
+}
+
+ion-input::part(label), ion-textarea::part(label), ion-select::part(label) {
+  font-weight: 600;
+  color: #64748b;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+/* ====================
+   GRID LAYOUT
+   ==================== */
+.grid-2-col {
+  display: flex;
+  gap: 12px;
+}
+
+.grid-2-col > ion-item {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.mt-2 {
+  margin-top: 14px;
+}
+
+/* ====================
+   ERROR MESSAGE 
+   ==================== */
+.error-box {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  padding: 16px;
+  border-radius: 16px;
+  color: #b91c1c;
+  margin-bottom: 20px;
+}
+
+.error-icon {
+  font-size: 24px;
+}
+
+.error-box strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.error-box p {
+  margin: 0;
+  font-size: 13px;
+}
+
+/* ====================
+   SUBMIT BUTTON 
+   ==================== */
+.submit-wrapper {
+  margin-top: 24px;
+  margin-bottom: 20px;
 }
 
 .submit-button {
-  margin-top: 24px;
+  --box-shadow: 0 8px 20px rgba(var(--ion-color-primary-rgb), 0.25);
+  font-weight: 700;
+  margin: 0;
+  font-size: 16px;
+  height: 52px;
 }
 
+/* ====================
+   LOADING STATE
+   ==================== */
+.state-container {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+}
+
+.spinner-wrapper {
+  background: white;
+  padding: 16px;
+  border-radius: 50%;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05);
+  margin-bottom: 16px;
+}
+
+.state-container p {
+  color: #64748b;
+  font-size: 14px;
+}
+
+/* ====================
+   ANIMATIONS
+   ==================== */
+.fade-in {
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 </style>

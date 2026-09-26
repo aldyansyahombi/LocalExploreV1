@@ -14,7 +14,7 @@
         <section class="hero-section">
           <div class="hero-card">
             <img 
-              src="https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
+              src="@/assets/gambar2.jpeg" 
               alt="Eksplorasi" 
               class="hero-image"
             />

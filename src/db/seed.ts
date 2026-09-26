@@ -29,8 +29,50 @@ const defaultCategories: Category[] = [
   {
     id: 5,
     name: "Museum",
-    icon: "🏛️",
-    description: "Museum dan tempat bersejarah",
+    icon: "🖼️",
+    description: "Museum, galeri, dan tempat bersejarah",
+  },
+  {
+    id: 6,
+    name: "Hiburan",
+    icon: "🎭",
+    description: "Tempat hiburan dan rekreasi",
+  },
+  {
+    id: 7,
+    name: "Belanja",
+    icon: "🛍️",
+    description: "Toko, pasar, dan pusat perbelanjaan",
+  },
+  {
+    id: 8,
+    name: "Penginapan",
+    icon: "🏨",
+    description: "Hotel, hostel, dan tempat menginap",
+  },
+  {
+    id: 9,
+    name: "Pendidikan",
+    icon: "🎓",
+    description: "Sekolah, kampus, dan fasilitas pendidikan",
+  },
+  {
+    id: 10,
+    name: "Kesehatan",
+    icon: "🏥",
+    description: "Rumah sakit, klinik, dan fasilitas kesehatan",
+  },
+  {
+    id: 11,
+    name: "Pantai",
+    icon: "🏖️",
+    description: "Pantai dan kawasan pesisir",
+  },
+  {
+    id: 12,
+    name: "Olahraga",
+    icon: "⚽",
+    description: "Tempat dan fasilitas olahraga",
   },
 ];
 

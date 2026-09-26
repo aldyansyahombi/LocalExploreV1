@@ -1,45 +1,44 @@
 <template>
   <ion-page>
     <!-- HEADER -->
-    <ion-header>
-      <ion-toolbar>
+    <ion-header class="ion-no-border">
+      <ion-toolbar class="custom-toolbar">
         <ion-buttons slot="start">
-          <ion-back-button default-href="/places" />
+          <ion-back-button default-href="/places" class="custom-back-btn" />
         </ion-buttons>
 
-        <ion-title>Detail Tempat</ion-title>
+        <ion-title class="custom-title">Detail Tempat</ion-title>
       </ion-toolbar>
     </ion-header>
 
-    <ion-content>
+    <ion-content class="custom-content">
 
       <!-- LOADING -->
       <div
         v-if="loading"
-        class="state-container"
+        class="state-container fade-in"
       >
-        <ion-spinner />
+        <div class="spinner-wrapper">
+          <ion-spinner name="crescent" color="primary" />
+        </div>
         <p>Memuat detail tempat...</p>
       </div>
 
       <!-- ERROR -->
       <div
         v-else-if="errorMessage"
-        class="state-container"
+        class="state-container fade-in"
       >
-        <div class="state-icon">
+        <div class="empty-illustration">
           ⚠️
         </div>
-
-        <h2>
-          Tempat tidak ditemukan
-        </h2>
-
-        <p>
+        <h2>Tempat tidak ditemukan</h2>
+        <p class="empty-subtitle">
           {{ errorMessage }}
         </p>
-
         <ion-button
+          class="action-btn"
+          shape="round"
           @click="goBack"
         >
           Kembali
@@ -49,12 +48,11 @@
       <!-- DETAIL -->
       <div
         v-else-if="place"
-        class="detail-container"
+        class="detail-container fade-in"
       >
 
-        <!-- HERO -->
-        <div class="hero">
-
+        <!-- HERO SECTION -->
+        <div class="hero-section">
           <img
             v-if="place.image"
             :src="place.image"
@@ -66,209 +64,196 @@
             v-else
             class="image-placeholder"
           >
-            📍
+            <span class="placeholder-emoji">📍</span>
           </div>
-
+          
+          <div class="hero-overlay"></div>
         </div>
 
-        <!-- BASIC INFO -->
-        <div class="content">
+        <!-- BASIC INFO & CONTENT -->
+        <div class="content-wrapper">
 
           <div class="title-row">
-
-            <div>
-              <h1>
+            <div class="title-left">
+              <h1 class="place-title">
                 {{ place.name }}
               </h1>
 
-              <p
-                v-if="categoryName"
-                class="category"
-              >
-                {{ categoryIcon }}
-                {{ categoryName }}
-              </p>
+              <div class="badges-container">
+                <div
+                  v-if="categoryName"
+                  class="category-badge"
+                >
+                  <span class="badge-icon">{{ categoryIcon }}</span>
+                  {{ categoryName }}
+                </div>
+
+                <!-- RATING -->
+                <div
+                  v-if="place.rating"
+                  class="rating-badge"
+                >
+                  ⭐ {{ place.rating }}
+                </div>
+              </div>
             </div>
 
-            <!-- FAVORITE -->
-            <ion-button
-              fill="clear"
-              size="large"
-              :disabled="favoriteLoading"
-              @click="toggleFavorite"
-            >
-              <span
-                class="favorite-icon"
-                :class="{
-                  active: isFavoritePlace
-                }"
+            <!-- FAVORITE (Heart Icon) -->
+            <div class="fav-action">
+              <button
+                class="fav-btn-circle"
+                :disabled="favoriteLoading"
+                @click="toggleFavorite"
               >
-                {{
-                  isFavoritePlace
-                    ? "❤️"
-                    : "🤍"
-                }}
-              </span>
-            </ion-button>
-
+                <span
+                  class="favorite-icon"
+                  :class="{ active: isFavoritePlace }"
+                >
+                  {{ isFavoritePlace ? "❤️" : "🤍" }}
+                </span>
+              </button>
+            </div>
           </div>
 
-          <!-- RATING -->
-          <div
-            v-if="place.rating"
-            class="rating"
-          >
-            ⭐ {{ place.rating }}
-          </div>
-
-          <!-- LOCATION -->
-          <ion-card>
-            <ion-card-header>
-              <ion-card-title>
-                📍 Lokasi
+          <!-- LOCATION CARD -->
+          <ion-card class="modern-card">
+            <ion-card-header class="no-pad-bottom">
+              <ion-card-title class="card-title">
+                📍 Lokasi Lengkap
               </ion-card-title>
             </ion-card-header>
 
             <ion-card-content>
+              <div class="address-box">
+                <p class="main-address">
+                  {{ place.address || "Alamat tidak tersedia" }}
+                </p>
 
-              <p>
-                {{ place.address || "Alamat tidak tersedia" }}
-              </p>
-
-              <p
-                v-if="
-                  place.city ||
-                  place.state ||
-                  place.country
-                "
-                class="location-text"
-              >
-                {{
-                  [
-                    place.city,
-                    place.state,
-                    place.country
-                  ]
-                    .filter(Boolean)
-                    .join(", ")
-                }}
-              </p>
-
-              <div class="coordinates">
-
-                <span>
-                  Latitude:
-                  {{ place.latitude }}
-                </span>
-
-                <span>
-                  Longitude:
-                  {{ place.longitude }}
-                </span>
-
+                <p
+                  v-if="place.city || place.state || place.country"
+                  class="location-text"
+                >
+                  <span class="icon-small">🗺️</span>
+                  {{
+                    [place.city, place.state, place.country]
+                      .filter(Boolean)
+                      .join(", ")
+                  }}
+                </p>
               </div>
 
+              <div class="coordinates">
+                <div class="coord-item">
+                  <span class="coord-label">Latitude</span>
+                  <span class="coord-val">{{ place.latitude }}</span>
+                </div>
+                <div class="coord-divider"></div>
+                <div class="coord-item">
+                  <span class="coord-label">Longitude</span>
+                  <span class="coord-val">{{ place.longitude }}</span>
+                </div>
+              </div>
             </ion-card-content>
           </ion-card>
 
-          <!-- DESCRIPTION -->
+          <!-- DESCRIPTION CARD -->
           <ion-card
             v-if="place.description"
+            class="modern-card"
           >
-            <ion-card-header>
-              <ion-card-title>
+            <ion-card-header class="no-pad-bottom">
+              <ion-card-title class="card-title">
                 📝 Deskripsi
               </ion-card-title>
             </ion-card-header>
 
             <ion-card-content>
-              <p>
+              <p class="desc-text">
                 {{ place.description }}
               </p>
             </ion-card-content>
           </ion-card>
 
-          <!-- SOURCE -->
-          <ion-card>
-            <ion-card-header>
-              <ion-card-title>
+          <!-- SOURCE CARD -->
+          <ion-card class="modern-card">
+            <ion-card-header class="no-pad-bottom">
+              <ion-card-title class="card-title">
                 ℹ️ Informasi Data
               </ion-card-title>
             </ion-card-header>
 
             <ion-card-content>
+              <div class="source-info">
+                <div class="source-row">
+                  <span class="source-label">Sumber:</span>
+                  <strong class="source-value">
+                    {{ place.source === "geoapify" ? "Geoapify" : "Data Lokal" }}
+                  </strong>
+                </div>
 
-              <p>
-                Sumber:
-                <strong>
-                  {{
-                    place.source === "geoapify"
-                      ? "Geoapify"
-                      : "Data Lokal"
-                  }}
-                </strong>
-              </p>
-
-              <p
-                v-if="place.sourceId"
-              >
-                ID sumber:
-                {{ place.sourceId }}
-              </p>
-
+                <div
+                  v-if="place.sourceId"
+                  class="source-row mt-1"
+                >
+                  <span class="source-label">ID sumber:</span>
+                  <span class="source-value id-text">{{ place.sourceId }}</span>
+                </div>
+              </div>
             </ion-card-content>
           </ion-card>
 
-          <!-- VISIT BUTTON -->
-          <ion-button
-            expand="block"
-            :disabled="visitLoading || isVisited"
-            @click="markAsVisited"
-          >
-            <ion-spinner
-              v-if="visitLoading"
-              name="crescent"
-            />
+          <!-- ACTION BUTTONS -->
+          <div class="action-group">
+            
+            <!-- VISIT BUTTON -->
+            <ion-button
+              expand="block"
+              shape="round"
+              class="primary-btn"
+              :disabled="visitLoading || isVisited"
+              @click="markAsVisited"
+            >
+              <ion-spinner v-if="visitLoading" name="crescent" />
+              <span v-else-if="isVisited">
+                ✓ Sudah Dikunjungi
+              </span>
+              <span v-else>
+                🕒 Tandai Sudah Dikunjungi
+              </span>
+            </ion-button>
 
-            <span v-else-if="isVisited">
-              ✓ Sudah Dikunjungi
-            </span>
+            <!-- TOGGLE FAVORITE BUTTON -->
+            <ion-button
+              expand="block"
+              shape="round"
+              fill="outline"
+              class="outline-btn"
+              :disabled="favoriteLoading"
+              @click="toggleFavorite"
+            >
+              <ion-spinner v-if="favoriteLoading" name="crescent" />
+              <span v-else>
+                {{ isFavoritePlace ? "❤️ Hapus dari Favorit" : "🤍 Tambah ke Favorit" }}
+              </span>
+            </ion-button>
 
-            <span v-else>
-              🕒 Tandai Sudah Dikunjungi
-            </span>
-          </ion-button>
+            <!-- LOCAL PLACE ACTION (EDIT) -->
+            <ion-button
+              v-if="place.source === 'local'"
+              expand="block"
+              shape="round"
+              fill="outline"
+              color="warning"
+              class="outline-btn mt-2"
+              @click="editPlace"
+            >
+              ✏️ Edit Tempat
+            </ion-button>
 
-          <ion-button
-            expand="block"
-            fill="outline"
-            :disabled="favoriteLoading"
-            @click="toggleFavorite"
-          >
-            <ion-spinner
-              v-if="favoriteLoading"
-              name="crescent"
-            />
-
-            <span v-else>
-              {{ isFavoritePlace ? "Hapus dari Favorit" : "Tambah ke Favorit" }}
-            </span>
-          </ion-button>
-
-          <!-- LOCAL PLACE ACTION -->
-          <ion-button
-            v-if="place.source === 'local'"
-            expand="block"
-            fill="outline"
-            @click="editPlace"
-          >
-            ✏️ Edit Tempat
-          </ion-button>
+          </div>
 
         </div>
-
       </div>
-
     </ion-content>
   </ion-page>
 </template>
@@ -611,96 +596,378 @@ onIonViewWillEnter(async () => {
 </script>
 
 <style scoped>
-.state-container {
-  min-height: 70vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 30px;
+/* ====================
+   GLOBAL & HEADER 
+   ==================== */
+.custom-content {
+  --background: #f8fafc;
 }
 
-.state-icon {
-  font-size: 50px;
-  margin-bottom: 12px;
+.custom-toolbar {
+  --background: #ffffff;
+  --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
 }
 
-.hero {
+.custom-title {
+  font-weight: 700;
+  font-size: 18px;
+  color: #1e293b;
+}
+
+.custom-back-btn {
+  color: #4f46e5;
+}
+
+/* ====================
+   HERO SECTION 
+   ==================== */
+.hero-section {
+  position: relative;
   width: 100%;
+  height: 280px;
+  background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+  border-bottom-left-radius: 40px;
+  border-bottom-right-radius: 40px;
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  z-index: 1;
 }
 
-.place-image {
+.place-image, .image-placeholder {
   width: 100%;
-  height: 240px;
+  height: 100%;
   object-fit: cover;
 }
 
 .image-placeholder {
-  height: 240px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--ion-color-light);
-  font-size: 70px;
 }
 
-.content {
-  padding: 16px;
+.placeholder-emoji {
+  font-size: 64px;
+  opacity: 0.6;
 }
 
+.hero-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: linear-gradient(to top, rgba(248, 250, 252, 1), transparent);
+}
+
+/* ====================
+   CONTENT WRAPPER 
+   ==================== */
+.content-wrapper {
+  position: relative;
+  padding: 0 16px 40px;
+  margin-top: -20px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ====================
+   TITLE & BADGES 
+   ==================== */
 .title-row {
   display: flex;
-  align-items: flex-start;
   justify-content: space-between;
-  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  padding: 0 4px;
 }
 
-.title-row h1 {
-  margin: 0;
+.title-left {
+  flex: 1;
+  padding-right: 16px;
+}
+
+.place-title {
   font-size: 26px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 12px;
   line-height: 1.2;
 }
 
-.category {
-  margin-top: 8px;
-  color: var(--ion-color-primary);
-  font-weight: 600;
+.badges-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.category-badge {
+  background: #e0e7ff;
+  color: #4338ca;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rating-badge {
+  background: #fef08a;
+  color: #854d0e;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* FAVORITE BUTTON */
+.fav-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fav-btn-circle {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: white;
+  border: none;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.fav-btn-circle:active {
+  transform: scale(0.95);
+}
+
+.fav-btn-circle:disabled {
+  opacity: 0.6;
 }
 
 .favorite-icon {
-  font-size: 30px;
+  font-size: 24px;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .favorite-icon.active {
-  transform: scale(1.05);
+  transform: scale(1.15);
 }
 
-.rating {
-  margin: 10px 0 18px;
-  font-size: 17px;
+/* ====================
+   CARDS 
+   ==================== */
+.modern-card {
+  margin: 0;
+  border-radius: 20px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
+  background: white;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.no-pad-bottom {
+  padding-bottom: 0;
+}
+
+/* LOCATION CARD */
+.address-box {
+  margin-bottom: 16px;
+}
+
+.main-address {
+  font-size: 15px;
   font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 6px;
+  line-height: 1.4;
 }
 
 .location-text {
-  color: var(--ion-color-medium);
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.icon-small {
+  font-size: 16px;
 }
 
 .coordinates {
   display: flex;
+  align-items: center;
+  background: #f8fafc;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.coord-item {
+  flex: 1;
+  display: flex;
   flex-direction: column;
-  gap: 4px;
-  margin-top: 14px;
+  gap: 2px;
+}
+
+.coord-label {
+  font-size: 11px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.coord-val {
   font-size: 13px;
-  color: var(--ion-color-medium);
+  color: #475569;
+  font-weight: 600;
 }
 
-ion-card {
-  margin-left: 0;
-  margin-right: 0;
+.coord-divider {
+  width: 1px;
+  height: 24px;
+  background: #cbd5e1;
+  margin: 0 16px;
 }
 
-ion-button {
-  margin-top: 12px;
+/* DESCRIPTION CARD */
+.desc-text {
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* SOURCE CARD */
+.source-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.source-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.source-label {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.source-value {
+  font-size: 13px;
+  color: #0f172a;
+}
+
+.id-text {
+  font-family: monospace;
+  background: #f1f5f9;
+  padding: 2px 8px;
+  border-radius: 6px;
+  color: #475569;
+}
+
+.mt-1 { margin-top: 8px; }
+
+/* ====================
+   ACTIONS GROUP 
+   ==================== */
+.action-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.primary-btn {
+  --box-shadow: 0 8px 16px rgba(var(--ion-color-primary-rgb), 0.25);
+  font-weight: 700;
+  margin: 0;
+}
+
+.outline-btn {
+  --border-width: 2px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.mt-2 { margin-top: 16px; }
+
+/* ====================
+   STATES (LOADING / ERROR) 
+   ==================== */
+.state-container {
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+}
+
+.spinner-wrapper {
+  background: white;
+  padding: 16px;
+  border-radius: 50%;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05);
+  margin-bottom: 16px;
+}
+
+.state-container p {
+  color: #64748b;
+  font-size: 14px;
+}
+
+.empty-illustration {
+  font-size: 70px;
+  margin-bottom: 16px;
+}
+
+.state-container h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 8px;
+}
+
+.empty-subtitle {
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0 0 24px;
+}
+
+.action-btn {
+  --padding-start: 24px;
+  --padding-end: 24px;
+  font-weight: 600;
+}
+
+/* ====================
+   ANIMATIONS
+   ==================== */
+.fade-in {
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>
