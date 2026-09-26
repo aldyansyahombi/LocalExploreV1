@@ -49,16 +49,7 @@
         <!-- SEARCH -->
         <!-- ================================= -->
 
-        <section class="search-section">
-
-          <ion-searchbar
-            v-model="searchQuery"
-            placeholder="Cari tempat menarik..."
-            :debounce="300"
-            @ionInput="handleSearch"
-          />
-
-        </section>
+        
 
 
         <!-- ================================= -->
@@ -588,6 +579,8 @@ import {
   onMounted,
 } from "vue";
 
+import { onIonViewWillEnter } from "@ionic/vue";
+
 import {
   useRouter,
 } from "vue-router";
@@ -995,10 +988,8 @@ function goToProfile() {
    MOUNT
 ================================= */
 
-onMounted(() => {
-
-  loadDashboard();
-
+onIonViewWillEnter(async () => {
+  await loadDashboard();
 });
 
 </script>
@@ -1156,7 +1147,8 @@ ion-searchbar {
 
 .location-card {
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: stretch;
   gap: 14px;
   padding: 18px;
   border-radius: 16px;

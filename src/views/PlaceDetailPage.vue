@@ -222,7 +222,7 @@
           <!-- VISIT BUTTON -->
           <ion-button
             expand="block"
-            :disabled="visitLoading"
+            :disabled="visitLoading || isVisited"
             @click="markAsVisited"
           >
             <ion-spinner
@@ -230,8 +230,28 @@
               name="crescent"
             />
 
+            <span v-else-if="isVisited">
+              ✓ Sudah Dikunjungi
+            </span>
+
             <span v-else>
               🕒 Tandai Sudah Dikunjungi
+            </span>
+          </ion-button>
+
+          <ion-button
+            expand="block"
+            fill="outline"
+            :disabled="favoriteLoading"
+            @click="toggleFavorite"
+          >
+            <ion-spinner
+              v-if="favoriteLoading"
+              name="crescent"
+            />
+
+            <span v-else>
+              {{ isFavoritePlace ? "Hapus dari Favorit" : "Tambah ke Favorit" }}
             </span>
           </ion-button>
 
@@ -258,6 +278,8 @@ import {
   onMounted,
   ref,
 } from "vue";
+
+import { onIonViewWillEnter } from "@ionic/vue";
 
 import {
   useRoute,
@@ -292,6 +314,7 @@ import {
   addFavorite,
   removeFavorite,
   addVisitHistory,
+  getUserVisitHistory,
 } from "@/services/database.service";
 
 import {
@@ -328,6 +351,8 @@ const favoriteLoading =
 
 const visitLoading =
   ref(false);
+
+const isVisited = ref(false);
 
 /* =================================
    COMPUTED-LIKE DATA
@@ -370,6 +395,7 @@ async function loadPlace() {
     }
 
     place.value = result;
+    await checkVisited();
 
     /*
      * Load kategori
@@ -410,6 +436,7 @@ async function loadPlace() {
   } finally {
     loading.value = false;
   }
+  
 }
 
 /* =================================
@@ -514,6 +541,8 @@ async function markAsVisited() {
       placeId: currentPlace.id,
       visitedAt: new Date().toISOString(),
     });
+
+    isVisited.value = true;
   } catch (error) {
     console.error(
       "Gagal mencatat kunjungan:",
@@ -523,6 +552,29 @@ async function markAsVisited() {
     visitLoading.value = false;
   }
 }
+
+async function checkVisited() {
+  const currentPlace = place.value;
+
+  if (!currentPlace?.id) {
+    return;
+  }
+
+  const userId = getCurrentUserId();
+
+  if (!userId) {
+    return;
+  }
+
+  const history =
+    await getUserVisitHistory(userId);
+
+  isVisited.value = history.some(
+    (item) =>
+      item.placeId === currentPlace.id
+  );
+}
+
 
 /* =================================
    EDIT LOCAL PLACE
@@ -534,7 +586,7 @@ function editPlace() {
   }
 
   router.push({
-    name: "PlaceForm",
+    name: "PlaceEdit",
     query: {
       id: String(place.value.id),
     },
@@ -553,8 +605,8 @@ function goBack() {
    INIT
 ================================= */
 
-onMounted(() => {
-  loadPlace();
+onIonViewWillEnter(async () => {
+  await loadPlace();
 });
 </script>
 

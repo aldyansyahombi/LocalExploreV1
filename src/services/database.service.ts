@@ -265,6 +265,20 @@ export async function addVisitHistory(
 ): Promise<number> {
   const db = await getDatabase();
 
+  const existingHistory = await db.getAllFromIndex(
+    "visit_history",
+    "by-user",
+    history.userId
+  );
+
+  const existing = existingHistory.find(
+    (item) => item.placeId === history.placeId
+  );
+
+  if (existing?.id) {
+    return existing.id;
+  }
+
   return db.add("visit_history", history);
 }
 

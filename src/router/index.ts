@@ -9,6 +9,7 @@ import PlaceFormPage from "../views/PlaceFormPage.vue";
 import FavoritesPage from "../views/FavoritesPage.vue";
 import HistoryPage from "../views/HistoryPage.vue";
 import ProfilePage from "../views/ProfilePage.vue";
+import MyPlacesPage from "../views/MyPlacesPage.vue";
 
 import { isLoggedIn } from "@/services/auth.service.js";
 
@@ -74,12 +75,26 @@ const routes = [
   },
 
   {
+    path: "/places/:id/edit",
+    name: "PlaceEdit",
+    component: PlaceFormPage,
+    meta: { requiresAuth: true },
+  },
+
+  {
     path: "/places/:id",
     name: "PlaceDetail",
     component: PlaceDetailPage,
     meta: {
       requiresAuth: true,
     },
+  },
+
+  {
+    path: "/my-places",
+    name: "MyPlaces",
+    component: MyPlacesPage,
+    meta: { requiresAuth: true },
   },
 
 

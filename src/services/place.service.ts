@@ -19,6 +19,7 @@ export interface PlaceSearchOptions {
   countryCode?: string;
 
   city?: string;
+  name?: string;
 
   limit?: number;
   offset?: number;

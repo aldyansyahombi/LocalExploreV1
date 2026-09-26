@@ -20,6 +20,7 @@ export interface GeoapifySearchOptions {
   city?: string;
 
   limit?: number;
+  name?: string;
   offset?: number;
 }
 
@@ -166,6 +167,7 @@ export async function fetchPlacesFromGeoapify(
     countryCode,
 
     city,
+    name,
 
     limit = 30,
     offset = 0,
@@ -189,6 +191,10 @@ export async function fetchPlacesFromGeoapify(
     "lang",
     "id"
   );
+
+  if (name?.trim()) {
+    params.set("name", name.trim());
+  }
 
   /*
    * =====================================
@@ -310,6 +316,8 @@ export async function fetchPlacesFromGeoapify(
   if (!response.ok) {
     const message =
       await response.text();
+
+    
 
     console.error(
       "Geoapify Places error:",
