@@ -1,4 +1,3 @@
-```vue
 <template>
   <ion-page>
     <ion-header class="ion-no-border">
@@ -460,4 +459,4 @@ section li {
   line-height: 1.6;
 }
 </style>
-```
+

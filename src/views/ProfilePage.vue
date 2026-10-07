@@ -205,6 +205,21 @@
                   </div>
                 </div>
               </div>
+              <div class="delete-account-wrapper">
+                <ion-button
+                  expand="block"
+                  color="danger"
+                  fill="outline"
+                  shape="round"
+                  @click="handleDeleteAccount"
+                >
+                  🗑️ Hapus Akun
+                </ion-button>
+
+                <p class="delete-account-warning">
+                  Tindakan ini permanen dan tidak dapat dibatalkan.
+                </p>
+              </div>
             </ion-card-content>
           </ion-card>
 
@@ -283,6 +298,7 @@ import {
   IonItem,
   IonLabel,
   IonInput,
+  alertController,
 } from "@ionic/vue";
 
 import BottomNavigation from "@/components/BottomNavigation.vue";
@@ -296,6 +312,7 @@ import {
   updateUser,
   getAllCategories,
   getUserByEmail,
+  deleteUserAccount,
 } from "@/services/database.service";
 
 
@@ -526,6 +543,57 @@ function handleLogout() {
     name: "Login",
   });
 
+}
+
+async function handleDeleteAccount() {
+  const userId = getCurrentUserId();
+
+  if (!userId) {
+    router.replace({
+      name: "Login",
+    });
+
+    return;
+  }
+
+  const alert = await alertController.create({
+    header: "Hapus Akun?",
+    message:
+      "Akun Anda akan dihapus secara permanen. Data favorit dan riwayat Anda juga akan dihapus. Tindakan ini tidak dapat dibatalkan.",
+    buttons: [
+      {
+        text: "Batal",
+        role: "cancel",
+      },
+      {
+        text: "Hapus Akun",
+        role: "destructive",
+        handler: async () => {
+          try {
+            await deleteUserAccount(userId);
+
+            logout();
+
+            router.replace({
+              name: "Login",
+            });
+          } catch (error) {
+            console.error(
+              "Gagal menghapus akun:",
+              error
+            );
+
+            errorMessage.value =
+              error instanceof Error
+                ? error.message
+                : "Gagal menghapus akun.";
+          }
+        },
+      },
+    ],
+  });
+
+  await alert.present();
 }
 
 onIonViewWillEnter(async () => {

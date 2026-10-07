@@ -1,4 +1,5 @@
 import { getDatabase } from "../db/database";
+import { hashPassword } from "../services/password.service";
 
 import type {
   User,
@@ -68,6 +69,70 @@ export async function deleteUser(id: number): Promise<void> {
   const db = await getDatabase();
 
   await db.delete("users", id);
+}
+
+export async function deleteUserAccount(
+  userId: number
+): Promise<void> {
+  const db = await getDatabase();
+
+  // Hapus favorit milik user
+  const favorites = await db.getAllFromIndex(
+    "favorites",
+    "by-user",
+    userId
+  );
+
+  for (const favorite of favorites) {
+    if (favorite.id !== undefined) {
+      await db.delete("favorites", favorite.id);
+    }
+  }
+
+  // Hapus riwayat milik user
+  const histories = await db.getAllFromIndex(
+    "visit_history",
+    "by-user",
+    userId
+  );
+
+  for (const history of histories) {
+    if (history.id !== undefined) {
+      await db.delete("visit_history", history.id);
+    }
+  }
+
+  // Hapus akun
+  await db.delete("users", userId);
+
+  console.log("Akun berhasil dihapus:", userId);
+}
+
+// =====================================================
+// REVIEWER ACCOUNT
+// =====================================================
+
+export async function seedReviewerAccount(): Promise<void> {
+  const reviewerEmail = "reviewer@localexplore.app";
+  const reviewerPassword = "ReviewLocal2026!";
+
+  const existingUser = await getUserByEmail(reviewerEmail);
+
+  if (existingUser) {
+    return;
+  }
+
+  const hashedPassword = await hashPassword(reviewerPassword);
+
+  await createUser({
+    name: "Google Play Reviewer",
+    email: reviewerEmail,
+    password: hashedPassword,
+    preferences: [],
+    createdAt: new Date().toISOString(),
+  });
+
+  console.log("Reviewer account berhasil dibuat.");
 }
 
 // =====================================================
@@ -147,6 +212,7 @@ export async function getPlaceBySourceId(
     sourceId
   );
 }
+
 
 // =====================================================
 // CATEGORIES
