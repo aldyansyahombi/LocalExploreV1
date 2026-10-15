@@ -54,8 +54,8 @@
         <!-- HERO SECTION -->
         <div class="hero-section">
           <img
-            v-if="place.image"
-            :src="place.image"
+            v-if="displayImage"
+            :src="displayImage"
             :alt="place.name"
             class="place-image"
           />
@@ -152,6 +152,11 @@
                   <span class="coord-label">Longitude</span>
                   <span class="coord-val">{{ place.longitude }}</span>
                 </div>
+              </div>
+
+              <!-- PETA LOKASI -->
+              <div class="map-container mt-2">
+                <div id="detail-map" style="height: 200px; width: 100%; border-radius: 12px; z-index: 1; margin-top: 16px;"></div>
               </div>
             </ion-card-content>
           </ion-card>
@@ -262,7 +267,24 @@
 import {
   onMounted,
   ref,
+  computed,
+  nextTick,
+  watch,
 } from "vue";
+
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import { offlineTileLayer } from "@/utils/OfflineTileLayer";
+import icon from "leaflet/dist/images/marker-icon.png";
+import iconShadow from "leaflet/dist/images/marker-shadow.png";
+
+const DefaultIcon = L.icon({
+  iconUrl: icon,
+  shadowUrl: iconShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+});
+L.Marker.prototype.options.icon = DefaultIcon;
 
 import { onIonViewWillEnter } from "@ionic/vue";
 
@@ -593,6 +615,53 @@ function goBack() {
 onIonViewWillEnter(async () => {
   await loadPlace();
 });
+
+const unsplashImages = [
+  "https://images.unsplash.com/photo-1501504905252-473c47e087f8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+  "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+  "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+  "https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+  "https://images.unsplash.com/photo-1444653389962-8149286c578a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+];
+
+const displayImage = computed(() => {
+  if (place.value?.image) {
+    return place.value.image;
+  }
+  if (!place.value) return "";
+  const id = place.value.id || 0;
+  return unsplashImages[id % unsplashImages.length];
+});
+
+let map: L.Map | null = null;
+let marker: L.Marker | null = null;
+
+function initMap() {
+  const mapElement = document.getElementById("detail-map");
+  if (!mapElement || !place.value) return;
+
+  const lat = place.value.latitude;
+  const lng = place.value.longitude;
+
+  if (map) {
+    map.remove();
+  }
+
+  map = L.map("detail-map").setView([lat, lng], 14);
+  offlineTileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "© OpenStreetMap contributors",
+  }).addTo(map);
+
+  marker = L.marker([lat, lng]).addTo(map);
+}
+
+watch(loading, async (newVal) => {
+  if (!newVal) {
+    await nextTick();
+    initMap();
+  }
+}, { immediate: true });
+
 </script>
 
 <style scoped>

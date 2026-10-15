@@ -137,6 +137,7 @@
                 label="Latitude"
                 label-placement="stacked"
                 placeholder="-3.998"
+                readonly
                 :disabled="saving"
               />
             </ion-item>
@@ -149,9 +150,16 @@
                 label="Longitude"
                 label-placement="stacked"
                 placeholder="122.512"
+                readonly
                 :disabled="saving"
               />
             </ion-item>
+          </div>
+
+          <!-- PETA LOKASI -->
+          <div class="map-container mt-2">
+            <label class="map-label" style="font-size: 13px; font-weight: 600; color: #64748b; margin-bottom: 8px; display: block;">Pilih Lokasi pada Peta</label>
+            <div id="form-map" style="height: 250px; width: 100%; border-radius: 12px; z-index: 1;"></div>
           </div>
         </div>
 
@@ -236,7 +244,23 @@ import {
   onMounted,
   reactive,
   ref,
+  nextTick,
+  watch,
 } from "vue";
+
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import { offlineTileLayer } from "@/utils/OfflineTileLayer";
+import icon from "leaflet/dist/images/marker-icon.png";
+import iconShadow from "leaflet/dist/images/marker-shadow.png";
+
+const DefaultIcon = L.icon({
+  iconUrl: icon,
+  shadowUrl: iconShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+});
+L.Marker.prototype.options.icon = DefaultIcon;
 
 import {
   useRoute,
@@ -579,6 +603,38 @@ onMounted(async () => {
   }
 
 });
+
+let map: L.Map | null = null;
+let marker: L.Marker | null = null;
+
+function initMap() {
+  const mapElement = document.getElementById("form-map");
+  if (!mapElement) return;
+
+  const initialLat = form.latitude || -3.998;
+  const initialLng = form.longitude || 122.512;
+
+  map = L.map("form-map").setView([initialLat, initialLng], 13);
+  offlineTileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "© OpenStreetMap contributors",
+  }).addTo(map);
+
+  marker = L.marker([initialLat, initialLng]).addTo(map);
+
+  map.on("click", (e: L.LeafletMouseEvent) => {
+    form.latitude = parseFloat(e.latlng.lat.toFixed(6));
+    form.longitude = parseFloat(e.latlng.lng.toFixed(6));
+    marker?.setLatLng(e.latlng);
+  });
+}
+
+watch(loading, async (newVal) => {
+  if (!newVal) {
+    await nextTick();
+    initMap();
+  }
+}, { immediate: true });
+
 </script>
 
 <style scoped>

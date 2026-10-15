@@ -223,6 +223,26 @@
             </ion-card-content>
           </ion-card>
 
+                    <!-- OFFLINE DATA -->
+          <ion-card class="modern-card">
+            <ion-card-header class="no-pad-bottom">
+              <ion-card-title class="card-title">?? Mode Offline</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <p style="color: #64748b; font-size: 14px; margin-bottom: 12px;">
+                Unduh data lokasi dan peta agar dapat digunakan tanpa koneksi internet.
+              </p>
+              <ion-button
+                expand="block"
+                fill="outline"
+                shape="round"
+                router-link="/offline"
+              >
+                ?? Unduh Data Offline
+              </ion-button>
+            </ion-card-content>
+          </ion-card>
+
           <ion-card class="about-card">
   <ion-card-header>
     <ion-card-title>Tentang Aplikasi</ion-card-title>

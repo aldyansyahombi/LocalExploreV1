@@ -82,30 +82,95 @@ export function getGeoapifyCategory(
 export async function syncPlaces(
   options: PlaceSearchOptions
 ): Promise<Place[]> {
-  const places =
-    await fetchPlacesFromGeoapify(options);
-
-  if (places.length === 0) {
-    return [];
+  if (!navigator.onLine) {
+    console.log("Offline mode: searching local places");
+    return searchLocalPlaces(options);
   }
 
-  await saveGeoapifyPlaces(places);
+  try {
+    const places =
+      await fetchPlacesFromGeoapify(options);
 
-  const savedPlaces: Place[] = [];
-
-  for (const place of places) {
-    if (!place.sourceId) {
-      continue;
+    if (places.length === 0) {
+      return [];
     }
 
-    const savedPlace = await getPlaceBySourceId(
-      place.sourceId
-    );
+    await saveGeoapifyPlaces(places);
 
-    if (savedPlace) {
-      savedPlaces.push(savedPlace);
+    const savedPlaces: Place[] = [];
+
+    for (const place of places) {
+      if (!place.sourceId) {
+        continue;
+      }
+
+      const savedPlace = await getPlaceBySourceId(
+        place.sourceId
+      );
+
+      if (savedPlace) {
+        savedPlaces.push(savedPlace);
+      }
     }
+
+    return savedPlaces;
+  } catch (error) {
+    console.error("Gagal sync online, mencoba offline fallback:", error);
+    return searchLocalPlaces(options);
+  }
+}
+
+export async function searchLocalPlaces(
+  options: PlaceSearchOptions
+): Promise<Place[]> {
+  const { getAllPlaces } = await import("./database.service");
+  const allPlaces = await getAllPlaces();
+  
+  let filtered = allPlaces;
+
+  if (options.categoryId) {
+    filtered = filtered.filter(p => p.categoryId === options.categoryId);
   }
 
-  return savedPlaces;
+  if (options.name) {
+    const keyword = options.name.toLowerCase();
+    filtered = filtered.filter(p => p.name.toLowerCase().includes(keyword));
+  }
+
+  if (options.city) {
+    const city = options.city.toLowerCase();
+    filtered = filtered.filter(p => p.city?.toLowerCase().includes(city));
+  }
+  
+  if (options.latitude !== undefined && options.longitude !== undefined && options.radius) {
+    filtered = filtered.filter(p => {
+      const dist = getDistanceFromLatLonInKm(
+        options.latitude!, options.longitude!,
+        p.latitude, p.longitude
+      ) * 1000;
+      return dist <= options.radius!;
+    });
+  }
+
+  const limit = options.limit || 30;
+  const offset = options.offset || 0;
+
+  return filtered.slice(offset, offset + limit);
+}
+
+function getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const R = 6371;
+  const dLat = deg2rad(lat2 - lat1);
+  const dLon = deg2rad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const d = R * c;
+  return d;
+}
+
+function deg2rad(deg: number) {
+  return deg * (Math.PI / 180);
 }

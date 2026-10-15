@@ -11,6 +11,7 @@ import HistoryPage from "../views/HistoryPage.vue";
 import ProfilePage from "../views/ProfilePage.vue";
 import MyPlacesPage from "../views/MyPlacesPage.vue";
 import PrivacyPolicyPage from "@/views/PrivacyPolicyPage.vue";
+import OfflinePage from "../views/OfflinePage.vue";
 
 import { isLoggedIn } from "@/services/auth.service.js";
 
@@ -110,6 +111,15 @@ const routes = [
   // =========================
 
   {
+    path: "/offline",
+    name: "Offline",
+    component: OfflinePage,
+    meta: {
+      requiresAuth: true,
+    },
+  },
+
+  {
     path: "/favorites",
     name: "Favorites",
     component: FavoritesPage,
@@ -204,4 +214,5 @@ router.beforeEach((to) => {
 
 
 export default router;
+
 
